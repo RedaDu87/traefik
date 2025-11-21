@@ -23,9 +23,12 @@ services:
       - "--log.level=INFO"
 
     ports:
-      - "80:80"
-      - "443:443"
-
+      - published: 80
+        target: 80
+        protocol: tcp
+      - published: 443
+        target: 443
+        protocol: tcp
 
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -33,12 +36,12 @@ services:
 
     networks:
       - traefik
-      # IMPORTANT : pour router vers ton app, traefik doit être dans le même réseau overlay
       - annonces
 
     deploy:
       placement:
-        constraints: [node.role == manager]
+        constraints:
+          - node.role == manager
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.dashboard.rule=Host(`traefik.hamsterdeal.ch`)"
@@ -46,21 +49,12 @@ services:
         - "traefik.http.routers.dashboard.service=api@internal"
         - "traefik.http.routers.dashboard.tls.certresolver=le"
 
-                # 🚀 Redirection www -> non-www (optionnelle)
-        - "traefik.http.middlewares.www-redirect.redirectregex.regex=^https?://www\\.(.*)"
-        - "traefik.http.middlewares.www-redirect.redirectregex.replacement=https://$$1"
-        - "traefik.http.middlewares.www-redirect.redirectregex.permanent=true"
-        - "traefik.http.routers.annonces.middlewares=www-redirect"
-
-        # ⚙️ Port interne du conteneur
-        - "traefik.http.services.annonces.loadbalancer.server.port=8080"
-
 networks:
   traefik:
     driver: overlay
 
   annonces:
-    external: true     # ce réseau existe déjà car créé par ton autre stack
+    external: true
 
 volumes:
   traefik_letsencrypt:
