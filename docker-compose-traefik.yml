@@ -3,21 +3,25 @@ version: '3.8'
 services:
   traefik:
     image: traefik:v3.1
-
     command:
+      # 🔹 Providers & Docker Swarm integration
       - "--providers.swarm=true"
+      - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.exposedByDefault=false"
 
+      # 🔹 Entrypoints (HTTP + HTTPS)
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
 
+      # 🔹 Let's Encrypt (HTTPS automatique)
       - "--certificatesresolvers.le.acme.httpchallenge=true"
       - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.le.acme.email=contact@hamsterdeal.ch"
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
 
+      # 🔹 Dashboard Traefik (facultatif)
       - "--api.dashboard=true"
       - "--log.level=INFO"
 
@@ -34,12 +38,11 @@ services:
         constraints: [node.role == manager]
       labels:
         - "traefik.enable=true"
-
-        # ⚠️ LE PORT INTERNE OBLIGATOIRE EN SWARM
-        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-
-        # Dashboard HTTPS
         - "traefik.http.routers.dashboard.rule=Host(`traefik.hamsterdeal.ch`)"
         - "traefik.http.routers.dashboard.entrypoints=websecure"
         - "traefik.http.routers.dashboard.service=api@internal"
         - "traefik.http.routers.dashboard.tls.certresolver=le"
+  
+volumes:
+  mongo_data:
+  traefik_letsencrypt:
