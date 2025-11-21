@@ -29,7 +29,7 @@ jobs:
 
             echo "⬇ Pulling latest Traefik config from Git..."
             git fetch --all
-            git reset --hard origin/traefik
+            git reset --hard origin/main
 
             echo "🐳 Deploying Traefik stack..."
             sudo docker stack deploy -c docker-compose-traefik.yml traefik_stack
