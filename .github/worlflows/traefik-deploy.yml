@@ -4,7 +4,7 @@ on:
   workflow_dispatch:     # Déploiement manuel
   push:
     branches:
-      - traefik          # Déploiement automatique pour la branche "traefik"
+      - main          # Déploiement automatique pour la branche "main"
 
 jobs:
   deploy:
