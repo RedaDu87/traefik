@@ -1,10 +1,10 @@
 name: Deploy Traefik (Docker Swarm)
 
 on:
-  workflow_dispatch:   # Déploiement manuel du dashboard GitHub
+  workflow_dispatch:     # Déploiement manuel
   push:
     branches:
-      - traefik        # Déploiement automatique uniquement quand tu pushes la branche "traefik"
+      - traefik          # Déploiement automatique pour la branche "traefik"
 
 jobs:
   deploy:
@@ -22,7 +22,17 @@ jobs:
           SSHPASS: ${{ secrets.SSH_PASS }}
         run: |
           sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            set -e
+
+            echo "📂 Going to Traefik directory..."
             cd /home/${{ secrets.SSH_USER }}/traefik
+
+            echo "⬇ Pulling latest Traefik config from Git..."
+            git fetch --all
+            git reset --hard origin/traefik
+
+            echo "🐳 Deploying Traefik stack..."
             sudo docker stack deploy -c docker-compose-traefik.yml traefik_stack
-            echo "Traefik deployed successfully."
+
+            echo "✅ Traefik deployed successfully!"
           EOF
