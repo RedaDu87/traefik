@@ -22,7 +22,7 @@ jobs:
           SSHPASS: ${{ secrets.SSH_PASS }}
         run: |
           sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd /home/${{ secrets.SSH_USER }}/hamsterdeal
+            cd /home/${{ secrets.SSH_USER }}/traefik
             sudo docker stack deploy -c docker-compose-traefik.yml traefik_stack
             echo "Traefik deployed successfully."
           EOF
