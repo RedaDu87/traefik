@@ -45,7 +45,6 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.dashboard.rule=Host(`traefik.hamsterdeal.ch`)"
-        - "traefik.http.routers.dashboard.entrypoints=websecure"
         - "traefik.http.routers.dashboard.service=api@internal"
         - "traefik.http.routers.dashboard.tls.certresolver=le"
         - "traefik.http.services.annonces.loadbalancer.server.port=8080"
