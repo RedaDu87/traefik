@@ -1,0 +1,28 @@
+name: Deploy Traefik (Docker Swarm)
+
+on:
+  workflow_dispatch:   # Déploiement manuel du dashboard GitHub
+  push:
+    branches:
+      - traefik        # Déploiement automatique uniquement quand tu pushes la branche "traefik"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install SSH client
+        run: sudo apt-get install -y sshpass
+
+      - name: Deploy Traefik
+        env:
+          SSHPASS: ${{ secrets.SSH_PASS }}
+        run: |
+          sshpass -e ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd /home/${{ secrets.SSH_USER }}/hamsterdeal
+            sudo docker stack deploy -c docker-compose-traefik.yml traefik_stack
+            echo "Traefik deployed successfully."
+          EOF
