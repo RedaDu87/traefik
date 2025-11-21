@@ -3,6 +3,7 @@ version: '3.8'
 services:
   traefik:
     image: traefik:v3.1
+
     command:
       - "--providers.swarm=true"
       - "--providers.swarm.exposedByDefault=false"
@@ -34,8 +35,11 @@ services:
       labels:
         - "traefik.enable=true"
 
+        # ⚠️ LE PORT INTERNE OBLIGATOIRE EN SWARM
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+
         # Dashboard HTTPS
         - "traefik.http.routers.dashboard.rule=Host(`traefik.hamsterdeal.ch`)"
         - "traefik.http.routers.dashboard.entrypoints=websecure"
-        - "traefik.http.routers.dashboard.tls.certresolver=le"
         - "traefik.http.routers.dashboard.service=api@internal"
+        - "traefik.http.routers.dashboard.tls.certresolver=le"
