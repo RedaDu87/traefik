@@ -9,16 +9,20 @@ services:
       - "--providers.swarm.endpoint=unix:///var/run/docker.sock"
       - "--providers.swarm.exposedByDefault=false"
 
+      # Entrypoints
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.websecure.address=:443"
 
-      - "--certificatesresolvers.le.acme.httpchallenge=true"
-      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      # ⚠️ IMPORTANT : pas de redirection HTTP->HTTPS
+      # => sinon ACME HTTP-01 challenge échoue
+
+      # ACME Let's Encrypt
       - "--certificatesresolvers.le.acme.email=contact@hamsterdeal.ch"
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.le.acme.httpchallenge=true"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
 
+      # Dashboard
       - "--api.dashboard=true"
       - "--log.level=INFO"
 
@@ -35,8 +39,7 @@ services:
       - /var/lib/traefik/letsencrypt:/letsencrypt
 
     networks:
-      - traefik
-      - annonces
+      - traefik-net
 
     deploy:
       placement:
@@ -44,17 +47,13 @@ services:
           - node.role == manager
       labels:
         - "traefik.enable=true"
+
+        # Dashboard sécurisé HTTPS
         - "traefik.http.routers.dashboard.rule=Host(`traefik.hamsterdeal.ch`)"
+        - "traefik.http.routers.dashboard.entrypoints=websecure"
         - "traefik.http.routers.dashboard.service=api@internal"
         - "traefik.http.routers.dashboard.tls.certresolver=le"
-        - "traefik.http.services.annonces.loadbalancer.server.port=8080"
 
 networks:
-  traefik:
-    driver: overlay
-
-  annonces:
+  traefik-net:
     external: true
-
-volumes:
-  traefik_letsencrypt:
