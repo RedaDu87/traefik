@@ -46,7 +46,7 @@ services:
         constraints:
           - node.role == manager
       labels:
-        - "traefik.enable=true"
+        - "traefik.enable=false"
 
         # Dashboard sécurisé HTTPS
         - "traefik.http.routers.dashboard.rule=Host(`traefik.hamsterdeal.ch`)"
